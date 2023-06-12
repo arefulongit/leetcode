@@ -10,31 +10,44 @@
 //Explanation: 2 does not exist in nums so return -1
 object Solution {
     def search(nums: Array[Int], target: Int): Int = {
-        def rs(beginPosition:Int, endPosition:Int, count:Int):Int={
-            // Находим позицию равную сответствующую половине массива
-            val middlePosition = beginPosition+(endPosition-beginPosition)/2
-            if(nums(middlePosition) == target){
-                // Повезло - наткнулись на решение
-                return count+1
-            } else if(beginPosition == endPosition && nums(beginPosition)!=target){
-                // Начало и конец участка массива совпадают, 
-                // однако по этому адресу target отсутствует
-                return -1
-            } else if((endPosition-beginPosition == 1) 
-                            && nums(beginPosition)!=target && nums(endPosition)!=target){
-                // Начало и конец участка имеют соседние адреса, 
-                // однако в них нет target
-                return -1
-            } else if(nums(middlePosition) > target){
-                // Ищем решение дальше в первой половине массива
-                return rs(beginPosition,middlePosition,count+1)
-            }  else if(nums(middlePosition) < target){
-                // Ищем решение дальше во второй половине массива
-                return rs(middlePosition+1, endPosition, count+middlePosition+1)
+        def rs(beginIndex:Int, endIndex:Int):Int={
+            // Интервал между начальным и конечным индексом в массиве имеет 
+            // чётное/не чётное количество элементов от этого будет зависить 
+            // обработка интервала.
+            // !Не последний индекс, а именно длинну, поэтому "+1"!
+            val intervalLength = endIndex - beginIndex + 1
+            // Определяем середину интервала, в зависимости от чётности/нечётности
+            // длинны интервала по среднему индексу будет стоять элемент(нечётный)
+            // слева и справа от которого будут подинтервалы одинаковой длинны (нечетный)
+            // или это будет конечный индекс левого подинтервала (чётная длинна)
+            val middleIndex = beginIndex + intervalLength / 2
+            if(intervalLength % 2 == 1){
+                // Интервал нечётной длинны. Значит индекс указывает на средний элемент
+                // с двумя подинтервалами по сторонам
+                if(beginIndex == endIndex && nums(beginIndex) != target)
+                    return -1
+                else if(nums(middleIndex)==target)
+                    return middleIndex
+                else if(nums(middleIndex)>target)
+                    return rs(beginIndex, middleIndex-1)
+                else if(nums(middleIndex)<target)
+                    return rs(middleIndex+1, endIndex)
+                return -1                    
             } else {
-                return -1
+                // Индекс указывает на последний элемент левого подинтервала значит
+                // режет массив ровно паполам с двумя подинтервалами
+                // с beginIndex по middleIndex-1 и с middleIndex по endIndex
+                if(nums(middleIndex-1)==target)
+                    return middleIndex-1
+                else if(nums(middleIndex-1)>target)
+                    return rs(beginIndex, middleIndex-1)
+                if(nums(middleIndex)==target)
+                    return middleIndex
+                else if(nums(middleIndex)<target)
+                    return rs(middleIndex, endIndex)                
             }
-        }
-        rs(0, nums.size-1,0)
+            return -1
+       }
+        rs(0, nums.size-1)
     }
 }
